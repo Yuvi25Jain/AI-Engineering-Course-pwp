@@ -31,7 +31,7 @@ message_system={
 
 # message me role and content
 message={
-    "role": role,
+    "role": role, 
     "content": prompt
 }
 

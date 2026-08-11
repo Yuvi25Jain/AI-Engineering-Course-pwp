@@ -26,3 +26,6 @@ Week 7: Observability + Guardrails + Security
 Week 8: Deployment + Fine-Tuning + Capstone
 Bonus: Interview Prep + Resume Building
 
+
+Notes : 
+https://docs.google.com/document/d/15ziNq0ZNvSYXPjycVrrZfBD2ecjyODIp1COD8BTD78Q/edit?tab=t.1mgl0qw5gqg7

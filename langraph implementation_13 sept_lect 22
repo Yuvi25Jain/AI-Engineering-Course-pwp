@@ -1,0 +1,155 @@
+from typing import TypedDict
+from langgraph.graph import END , StateGraph
+
+
+#step1
+class State(TypedDict):
+  number: int
+
+#nodes
+def double(state: State)-> dict:
+  bnum = state["number"]
+  newnum = bnum*2
+  print("in double")
+  print(newnum)
+  return {"number": newnum}
+
+def finish(state: State)-> dict:
+  bnum = state["number"]
+  
+  print("in finish")
+  print(bnum)
+  return {"number": bnum}
+
+#edge ? return str instead of dictionary
+def decision(state: State) ->str:
+  if state["number"]<100:
+    return "double"
+  else:
+    return "finish"
+
+#initialise the graph
+builder = StateGraph(State)
+
+#to add new ("node name", function of node)
+builder.add_node("yuvi",double)
+
+builder.add_node("mummy", finish)
+
+#entry point
+builder.set_entry_point("yuvi")
+builder.add_conditional_edges(
+    "yuvi", decision , {"double": "yuvi" , "finish":"mummy"}
+)
+
+builder.add_edge("mummy", END)
+graph = builder.compile()
+
+if __name__ == "__main__":
+  result = graph.invoke({"number":7})
+
+
+Explaination about each step:
+
+1.  state
+class State(TypedDict):
+  number: int
+
+creates a notebook , which have only one entry "number"
+each node , reads this notebook and update it if required
+
+2. Node : double , finish : worker step/function
+
+def double(state: State)-> dict:
+  bnum = state["number"]
+  newnum = bnum*2
+  print("in double")
+  print(newnum)
+  return {"number": newnum}
+
+def finish(state: State)-> dict:
+  bnum = state["number"]
+  print("in finish")
+  print(bnum)
+  return {"number": bnum}
+
+i. double :
+    take number from notebook and doubles it. then update the number in notebook        with the new value.
+
+ii. finish:
+    just print notebook number , doesn't change the values.
+
+3. edge: decision making
+
+def decision(state: State) ->str:
+  if state["number"]<100:
+    return "double"
+  else:
+    return "finish"
+
+check notebook number , if less than 100 hai to double it else run finish. only return string (name of next node) , not dictionary
+
+4. builder = StateGraph(State)
+graph skeleton ( which connects node with the edges)
+
+5.  builder.add_node("yuvi", double)
+builder.add_node("mummy", finish)
+
+
+add_node("name", function) ka matlab hai:
+Graph ko batana ki ek step (node) exist karta hai, aur us step ke liye kaunsa Python function run karna hai.
+
+"yuvi" aur "mummy" bas labels/names hain.
+Ye fun names tum khud choose kar sakte ho — jaise "karateKid", "drawingStep", "finalBoss".
+Important baat: ye names later graph ke andar use hote hain (entry point, edges, etc.), toh consistency zaroori hai.
+
+First argument = node ka naam (tumhari marzi, koi bhi string).
+
+Second argument = actual Python function jo run hoga.
+
+6. 
+🔹 Entry Point
+python
+builder.set_entry_point("yuvi")
+Matlab graph hamesha "yuvi" node se start karega.
+
+"yuvi" node ke andar tumne double function rakha hai, toh pehla step hamesha double hi chalega.
+
+🔹 Conditional Edges
+python
+builder.add_conditional_edges(
+    "yuvi", decision , {"double": "yuvi" , "finish":"mummy"}
+)
+Ye line bolti hai:
+Jab "yuvi" node run ho jaata hai, uske baad decision function check karega ki next step kya hoga.
+
+decision function return karta hai "double" ya "finish".
+
+Agar "double" return hua → phir se "yuvi" node run hoga (loop).
+
+Agar "finish" return hua → "mummy" node run hoga (aur usme finish function chalega).
+
+🔹 Flow Example
+Start state: {"number": 7}
+
+Entry point "yuvi" → double → 14.
+
+Decision: 14 < 100 → "double" → wapas "yuvi".
+
+"yuvi" → double → 28.
+
+Decision: 28 < 100 → phir "yuvi".
+
+"yuvi" → double → 56.
+
+Decision: 56 < 100 → phir "yuvi".
+
+"yuvi" → double → 112.
+
+Decision: 112 ≥ 100 → "finish" → "mummy".
+
+"mummy" → finish → END.
+
+Final result: {"number": 112}.
+
+
